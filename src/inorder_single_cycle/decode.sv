@@ -6,7 +6,7 @@ module decode #(
     parameter RD_WIDTH = 5,
     parameter RS_WIDTH = 5,
 
-    parameter NUM_REGS = 32,
+    parameter NUM_REGS = 1 << RD_WIDTH,
     parameter ADDR_WIDTH = $clog2(NUM_REGS),
     parameter I_TYPE_IMM_WIDTH = 12
 ) (

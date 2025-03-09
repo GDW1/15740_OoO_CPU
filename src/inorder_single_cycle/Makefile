@@ -7,7 +7,7 @@ MK_FILE=Vtest.mk
 EXE_FILE=Vtest
 
 #https://www.gnu.org/software/make/manual/make.html#Prerequisite-Types
-obj_dir/$(EXE_FILE): | obj_dir
+obj_dir/$(EXE_FILE): $(SV_FILE) | obj_dir
 	+$(MAKE) -C obj_dir -f $(MK_FILE) $(EXE_FILE)
 
 obj_dir: $(SV_FILE)
