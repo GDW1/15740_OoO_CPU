@@ -3,6 +3,8 @@ module decode #(
     parameter OPCODE_WIDTH = 7,
     parameter FUNCT3_WIDTH = 3,
     parameter FUNCT7_WIDTH = 7,
+    parameter RD_WIDTH = 5,
+    parameter RS_WIDTH = 5,
 
     parameter NUM_REGS = 32,
     parameter ADDR_WIDTH = $clog2(NUM_REGS),
@@ -24,11 +26,11 @@ module decode #(
 
 always_comb begin : decode_r_type
     assign opcode = instruction[OPCODE_WIDTH - 1:0]
-    assign funct3 = instruction[OPCODE_WIDTH + FUNCT3_WIDTH - 1:OPCODE_WIDTH]
+    assign funct3 = instruction[RD_WIDTH + OPCODE_WIDTH + FUNCT3_WIDTH - 1:RD_WIDTH + OPCODE_WIDTH]
     assign funct7 = instruction[INSN_WIDTH - 1:INSN_WIDTH - FUNCT7_WIDTH]
-    assign rs1 = instruction[19:15]
-    assign rs2 = instruction[24:20]
-    assign rd = instruction[11:7]
+    assign rs1 = instruction[INSN_WIDTH - FUNCT7_WIDTH - RS_WIDTH - 1:INSN_WIDTH - FUNCT7_WIDTH - RS_WIDTH*2]
+    assign rs2 = instruction[INSN_WIDTH - FUNCT7_WIDTH - 1:INSN_WIDTH - FUNCT7_WIDTH - RS_WIDTH]
+    assign rd = instruction[OPCODE_WIDTH + RD_WIDTH - 1:OPCODE_WIDTH]
 end // decode_r_type
 
 always_comb begin : decode_i_type
