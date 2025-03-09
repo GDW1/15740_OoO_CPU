@@ -1,22 +1,25 @@
-module memory #(
+module Memory #(
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 32,
     parameter MEM_SIZE = 1024,
     parameter NUM_READ_PORTS = 1,
-    parameter NUM_WRITE_PORTS = 1,
+    parameter NUM_WRITE_PORTS = 1
 ) (
     input logic clk,
     input logic reset,
-    input logic [DATA_WIDTH-1:0][NUM_WRITE_PORTS-1:0] write_data,
-    input logic [ADDR_WIDTH-1:0][NUM_WRITE_PORTS-1:0] write_addr,
-    input logic [ADDR_WIDTH-1:0][NUM_READ_PORTS-1:0] read_addr,
+    input logic [DATA_WIDTH-1:0] write_data [NUM_WRITE_PORTS-1:0],
+    input logic [ADDR_WIDTH-1:0] write_addr [NUM_WRITE_PORTS-1:0] ,
+    input logic [ADDR_WIDTH-1:0] read_addr [NUM_READ_PORTS-1:0],
     input logic [NUM_READ_PORTS-1:0] read_enable,
     input logic [NUM_WRITE_PORTS-1:0] write_enable,
 
-    output logic [DATA_WIDTH-1:0][NUM_READ_PORTS-1:0] read_data
+    output logic [DATA_WIDTH-1:0] read_data [NUM_READ_PORTS-1:0]
 );
 
-    logic [DATA_WIDTH-1:0] mem[MEM_SIZE-1:0] = {'h1, 'h2, 'h3, 'h4};
+    initial begin
+        $readmemb("memory_file.mem", mem);        
+    end
+    logic [DATA_WIDTH-1:0] mem[MEM_SIZE-1:0];
 
     always_ff @(posedge clk) begin
         if (reset) begin

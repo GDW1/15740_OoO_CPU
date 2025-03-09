@@ -1,6 +1,5 @@
 VC=verilator #verilog compiler
-VFLAGS= -Wall --trace --cc #verilator flags
-
+VFLAGS= -sv --trace --cc --timing #verilator flags
 SV_FILE=test.sv
 CPP_FILE=tb_test.cpp
 MK_FILE=Vtest.mk

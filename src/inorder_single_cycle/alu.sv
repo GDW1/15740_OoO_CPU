@@ -3,16 +3,16 @@ module ALU #(
     parameter OPCODE_WIDTH = 7,
     parameter FUNCT3_WIDTH = 3,
     parameter FUNCT7_WIDTH = 7,
-    parameter NUM_OPS = 64, //TODO fix 
+    parameter NUM_OPS = 64 //TODO fix 
 ) (
     input logic [DATA_WIDTH-1:0] operand1,
     input logic [DATA_WIDTH-1:0] operand2,
     input logic [OPCODE_WIDTH - 1: 0] opcode,
     input logic [FUNCT3_WIDTH - 1: 0] funct3,
-    input logic [FUNCT3_WIDTH - 1: 0] funct7,
+    input logic [FUNCT7_WIDTH - 1: 0] funct7,
 
     output logic [DATA_WIDTH-1:0] result,
-    output logic zero,
+    output logic zero
 );
 
 /**
@@ -28,28 +28,30 @@ typedef enum logic [$clog2(NUM_OPS)-1:0] {
     AND,
     SLL,
     SRL,
+    SRA,
     SLT,
-    SLTU,
+    SLTU
 } E_ALU_OPS;
 
 E_ALU_OPS alu_op;
 
 always_comb begin : decode_op
-    case (opcode) :
+    case (opcode)
         7'b0110011: begin
-            case(funct3) :
-                3'h0: alu_op = (funct7 == 7'h02) ? SUB : ADD;
+            case(funct3)
+                3'h0: alu_op = ((funct7 == 7'h02) ? SUB : ADD);
                 3'h4: alu_op = XOR;
                 3'h6: alu_op = OR;
                 3'h7: alu_op = AND;
                 3'h1: alu_op = SLL;
-                3'h5: alu_op = (funct7 == 7'h02) ? SRA : SRL;
+                3'h5: alu_op = ((funct7 == 7'h02) ? SRA : SRL);
                 3'h2: alu_op = SLT;
                 3'h3: alu_op = SLTU;
+                default: alu_op = ADD;
             endcase
         end 
         7'b0010011: begin
-            case(funct3) :
+            case(funct3)
                 3'h0: alu_op = ADD;
                 3'h4: alu_op = XOR;
                 3'h6: alu_op = OR;
@@ -58,13 +60,15 @@ always_comb begin : decode_op
                 3'h5: alu_op = (operand2[11:5] == 7'h02) ? SRA : SRL;
                 3'h2: alu_op = SLT;
                 3'h3: alu_op = SLTU;
+                default: alu_op = ADD;
             endcase
         end 
+        default: alu_op = ADD;
     endcase
 end
 
 always_comb begin : execute_op
-    case(alu_op):
+    case(alu_op)
         ADD: result = operand1 + operand2;
         SUB: result = operand1 - operand2;
         XOR: result = operand1 ^ operand2;
@@ -75,6 +79,7 @@ always_comb begin : execute_op
         SRA: result = operand1 >>> operand2[4:0];
         SLT: result = (operand1 < operand2) ? 1 : 0;
         SLTU: result = (operand1 < operand2) ? 1 : 0; // TODO FIX
+        default: result = 0;
     endcase
 end
 

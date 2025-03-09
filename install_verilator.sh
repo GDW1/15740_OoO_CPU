@@ -16,8 +16,11 @@ cd verilator
 # Checkout the stable release (commit ac3f30e)
 git checkout ac3f30ed6c9f1c9530bb68192396c117c14419d0
 
+# get current absolute path
+VERILATOR_ROOT=$(pwd)/verilator/verilator
+
 # Build and install Verilator
 autoconf
-./configure
-make
-make install
+./configure --prefix=$VERILATOR_ROOT
+make -j4
+make install -j4

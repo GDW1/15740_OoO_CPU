@@ -1,4 +1,4 @@
-module decode #(
+module Decode #(
     parameter INSN_WIDTH = 32,
     parameter OPCODE_WIDTH = 7,
     parameter FUNCT3_WIDTH = 3,
@@ -15,26 +15,26 @@ module decode #(
 // R-Type inputs
     output logic [OPCODE_WIDTH - 1: 0] opcode,
     output logic [FUNCT3_WIDTH - 1: 0] funct3,
-    output logic [FUNCT3_WIDTH - 1: 0] funct7,
+    output logic [FUNCT7_WIDTH - 1: 0] funct7,
     output logic [ADDR_WIDTH - 1: 0]   rs1,
     output logic [ADDR_WIDTH - 1: 0]   rs2,
     output logic [ADDR_WIDTH - 1: 0]   rd,
 
 // I-Type inputs
-    output logic [I_TYPE_IMM_WIDTH - 1: 0] i_type_imm 
+    output logic [I_TYPE_IMM_WIDTH - 1: 0] i_type_imm
 );
 
 always_comb begin : decode_r_type
-    assign opcode = instruction[OPCODE_WIDTH - 1:0]
-    assign funct3 = instruction[RD_WIDTH + OPCODE_WIDTH + FUNCT3_WIDTH - 1:RD_WIDTH + OPCODE_WIDTH]
-    assign funct7 = instruction[INSN_WIDTH - 1:INSN_WIDTH - FUNCT7_WIDTH]
-    assign rs1 = instruction[INSN_WIDTH - FUNCT7_WIDTH - RS_WIDTH - 1:INSN_WIDTH - FUNCT7_WIDTH - RS_WIDTH*2]
-    assign rs2 = instruction[INSN_WIDTH - FUNCT7_WIDTH - 1:INSN_WIDTH - FUNCT7_WIDTH - RS_WIDTH]
-    assign rd = instruction[OPCODE_WIDTH + RD_WIDTH - 1:OPCODE_WIDTH]
+    opcode = instruction[OPCODE_WIDTH - 1:0];
+    funct3 = instruction[RD_WIDTH + OPCODE_WIDTH + FUNCT3_WIDTH - 1:RD_WIDTH + OPCODE_WIDTH];
+    funct7 = instruction[INSN_WIDTH - 1:INSN_WIDTH - FUNCT7_WIDTH];
+    rs1 = instruction[INSN_WIDTH - FUNCT7_WIDTH - RS_WIDTH - 1:INSN_WIDTH - FUNCT7_WIDTH - RS_WIDTH*2];
+    rs2 = instruction[INSN_WIDTH - FUNCT7_WIDTH - 1:INSN_WIDTH - FUNCT7_WIDTH - RS_WIDTH];
+    rd = instruction[OPCODE_WIDTH + RD_WIDTH - 1:OPCODE_WIDTH];
 end // decode_r_type
 
 always_comb begin : decode_i_type
-    assign i_type_imm = instruction[31:20]
+    i_type_imm = instruction[31:20];
 end // decode_i_type
 
 endmodule
