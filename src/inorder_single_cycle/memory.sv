@@ -16,6 +16,7 @@ module Memory #(
     output logic [DATA_WIDTH-1:0] read_data [NUM_READ_PORTS-1:0]
 );
 
+    //Read in the memory file into our memory
     initial begin
         $readmemb("memory_file.mem", mem);        
     end

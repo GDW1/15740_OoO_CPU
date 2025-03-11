@@ -46,6 +46,7 @@ module RF #(
     always_comb begin
         for (k = 0; k < READ_PORTS; k = k + 1) begin
             read_data[k] = regs[read_addrs[k]];
+            $display("Reading register %d: %d", k, regs[read_addrs[k]]);
         end
     end
 

@@ -29,7 +29,7 @@ always_ff @(posedge clk) begin
     if (rst) begin
         PC <= 0;
     end else begin
-        PC <= PC + 4;
+        PC <= PC + 1;
     end
 end
 

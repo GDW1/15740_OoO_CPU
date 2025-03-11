@@ -4,7 +4,7 @@
 #include <verilated_vcd_c.h>
 #include "obj_dir/Vtest.h"
 
-#define MAX_SIM_TIME 5
+#define MAX_SIM_TIME 10
 vluint64_t sim_time = 0;
 
 int main(int argc, char** argv, char** env) {
