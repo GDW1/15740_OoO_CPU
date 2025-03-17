@@ -4,7 +4,7 @@
 #include <verilated_vcd_c.h>
 #include "obj_dir/Vtest.h"
 
-#define MAX_SIM_TIME 10
+#define MAX_SIM_TIME 20
 vluint64_t sim_time = 0;
 
 int main(int argc, char** argv, char** env) {
@@ -23,7 +23,7 @@ int main(int argc, char** argv, char** env) {
         sim_time++;
     }
 
-    printf("Simulation finished on time: %ld\n", sim_time);
+    printf("Simulation finished on cycle: %ld\n", sim_time);
 
     m_trace->close();
     delete dut;

@@ -31,14 +31,14 @@ module RF #(
         end else begin
             for (j = 0; j < WRITE_PORTS; j = j + 1) begin
                 if (write_reg_enable[j]) begin
-                    $display("Writing %d to register %d (reg_write %d)", write_data[j], write_addrs[j], write_reg_enable[j]);
+                    $display("Writing %d to register %d (reg_write %d)", $signed(write_data[j]), write_addrs[j], write_reg_enable[j]);
                     regs[write_addrs[j]] <= write_data[j];
                 end
             end
             // print out the registers
             $display("Registers:");
             for (i = 0; i < NUM_REGS; i = i + 1) begin
-                $display("Register %d: %d", i, regs[i]);
+                $display("Register %d: %d %d", i, regs[i], $signed(regs[i]));
             end
         end
     end

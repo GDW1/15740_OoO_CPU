@@ -98,6 +98,7 @@ Control #(
 ) control_unit (
     .opcode(opcode),
     .i_type_imm(i_type_imm),
+    .funct3(funct3),
     .reg_write(reg_write),
     .mem_read(mem_read),
     .mem_write(mem_write),

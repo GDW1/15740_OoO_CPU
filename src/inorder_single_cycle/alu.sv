@@ -39,12 +39,12 @@ always_comb begin : decode_op
     case (opcode)
         7'b0110011: begin
             case(funct3)
-                3'h0: alu_op = ((funct7 == 7'h02) ? SUB : ADD);
+                3'h0: alu_op = ((funct7 == 7'b0100000) ? SUB : ADD);
                 3'h4: alu_op = XOR;
                 3'h6: alu_op = OR;
                 3'h7: alu_op = AND;
                 3'h1: alu_op = SLL;
-                3'h5: alu_op = ((funct7 == 7'h02) ? SRA : SRL);
+                3'h5: alu_op = ((funct7 == 7'b0100000) ? SRA : SRL);
                 3'h2: alu_op = SLT;
                 3'h3: alu_op = SLTU;
                 default: alu_op = ADD;
@@ -57,7 +57,7 @@ always_comb begin : decode_op
                 3'h6: alu_op = OR;
                 3'h7: alu_op = AND;
                 3'h1: alu_op = SLL;
-                3'h5: alu_op = (operand2[11:5] == 7'h02) ? SRA : SRL;
+                3'h5: alu_op = (operand2[11:5] == 7'b0100000) ? SRA : SRL;
                 3'h2: alu_op = SLT;
                 3'h3: alu_op = SLTU;
                 default: alu_op = ADD;
@@ -76,8 +76,9 @@ always_comb begin : execute_op
         AND: result = operand1 & operand2;
         SLL: result = operand1 << operand2[4:0];
         SRL: result = operand1 >> operand2[4:0];
-        SRA: result = operand1 >>> operand2[4:0];
-        SLT: result = (operand1 < operand2) ? 1 : 0;
+        //sign extension requires signed operands
+        SRA: result = $signed(operand1) >>> operand2[4:0];
+        SLT: result = ($signed(operand1) < $signed(operand2)) ? 1 : 0;
         SLTU: result = (operand1 < operand2) ? 1 : 0; // TODO FIX
         default: result = 0;
     endcase

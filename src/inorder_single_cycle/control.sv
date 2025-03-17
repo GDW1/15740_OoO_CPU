@@ -1,10 +1,11 @@
 module Control #(
     parameter NUM_OPS = 64,
-    parameter I_TYPE_IMM_WIDTH = 12
-
+    parameter I_TYPE_IMM_WIDTH = 12,
+    parameter FUNCT3_WIDTH = 3
 ) (
     input [6:0] opcode,
     input logic [I_TYPE_IMM_WIDTH - 1: 0] i_type_imm,
+    input logic [FUNCT3_WIDTH - 1: 0] funct3,
     output logic reg_write,
     
     output logic mem_read,
@@ -34,13 +35,13 @@ always_comb begin
             mem_to_reg = 0;
             branch = 0;
             jump = 0;
-            case(opcode[2:0])
+            case(funct3)
                 3'b000: imm_sel = 1; // ADD
                 3'b001: imm_sel = 2; // SLL
                 3'b010: imm_sel = 1; // SLT
                 3'b011: imm_sel = 2; // SLTU
                 3'b100: imm_sel = 2; // XOR
-                3'b101: imm_sel = (i_type_imm[11] == 1) ? 1 : 2; // SRL or SRA
+                3'b101: imm_sel = 2; // SRL or SRA
                 3'b110: imm_sel = 2; // OR
                 3'b111: imm_sel = 2; // AND
             endcase

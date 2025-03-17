@@ -16,10 +16,13 @@ obj_dir: $(TESTSV_FILE)
 	$(VC) $(VFLAGS) $^
 	$(VC) $(VFLAGS) $(TESTSV_FILE) --exe $(CPP_FILE)
 
-.PHONY: run clean
+.PHONY: run clean compile
 
 run: obj_dir/$(EXE_FILE)
 	@./obj_dir/$(EXE_FILE)
 
 clean:
 	rm -rf obj_dir
+
+compile:
+	(cd ../../riscv_translator/; ./translate.sh; mv memory_file.mem ../src/inorder_single_cycle)
