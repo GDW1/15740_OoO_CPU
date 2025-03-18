@@ -30,7 +30,13 @@ typedef enum logic [$clog2(NUM_OPS)-1:0] {
     SRL,
     SRA,
     SLT,
-    SLTU
+    SLTU,
+    BEQ,
+    BNE,
+    BLT,
+    BGE,
+    BLTU,
+    BGEU
 } E_ALU_OPS;
 
 E_ALU_OPS alu_op;
@@ -63,11 +69,28 @@ always_comb begin : decode_op
                 default: alu_op = ADD;
             endcase
         end 
+        7'b0000011, 7'b0100011: begin
+            //memory address = rs1+imm
+            alu_op = ADD;
+        end
+        7'b1100011: begin //Branches
+            case(funct3)
+                3'h0: alu_op = BEQ;
+                3'h1: alu_op = BNE;
+                3'h4: alu_op = BLT;
+                3'h5: alu_op = BGE;
+                3'h6: alu_op = BLTU;
+                3'h7: alu_op = BGEU;
+                default: alu_op = ADD;
+            endcase
+        end
         default: alu_op = ADD;
     endcase
 end
 
 always_comb begin : execute_op
+    result = 0;
+    zero = 0;
     case(alu_op)
         ADD: result = operand1 + operand2;
         SUB: result = operand1 - operand2;
@@ -80,6 +103,12 @@ always_comb begin : execute_op
         SRA: result = $signed(operand1) >>> operand2[4:0];
         SLT: result = ($signed(operand1) < $signed(operand2)) ? 1 : 0;
         SLTU: result = (operand1 < operand2) ? 1 : 0; // TODO FIX
+        BEQ: zero = ($signed(operand1) == $signed(operand2)) ? 1 : 0;
+        BNE: zero = ($signed(operand1) != $signed(operand2)) ? 1 : 0;
+        BLT: zero = ($signed(operand1) <  $signed(operand2)) ? 1 : 0;
+        BGE: zero = ($signed(operand1) >= $signed(operand2)) ? 1 : 0;
+        BLTU: zero = (operand1 < operand2) ? 1 : 0;
+        BGEU: zero = (operand1 >= operand2) ? 1 : 0;
         default: result = 0;
     endcase
 end

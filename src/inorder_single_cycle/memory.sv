@@ -3,7 +3,8 @@ module Memory #(
     parameter ADDR_WIDTH = 32,
     parameter MEM_SIZE = 1024,
     parameter NUM_READ_PORTS = 1,
-    parameter NUM_WRITE_PORTS = 1
+    parameter NUM_WRITE_PORTS = 1,
+    parameter NAME = "MEM"
 ) (
     input logic clk,
     input logic reset,
@@ -30,15 +31,19 @@ module Memory #(
         end else begin
             for (int i = 0; i < NUM_WRITE_PORTS; i++) begin
                 if (write_enable[i]) begin
+                    $display("[%s] Writing %d to address %d", NAME, write_data[i], write_addr[i]);
                     mem[write_addr[i]] <= write_data[i];
                 end
             end
         end
     end
 
-    always_comb begin
+    always_comb begin : read
         for (int i = 0; i < NUM_READ_PORTS; i++) begin
-            read_data[i] = mem[read_addr[i]];
+            if (read_enable[i]) begin
+                read_data[i] = mem[read_addr[i]];
+                $display("[%s] Reading %d from address %d", NAME, read_data[ i], read_addr[i]);
+            end
         end
     end
 

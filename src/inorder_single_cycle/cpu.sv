@@ -15,7 +15,9 @@ module InOrderCPU #(
 
     parameter NUM_REGS = 1 << RD_WIDTH,
     parameter ADDR_WIDTH = $clog2(NUM_REGS),
-    parameter I_TYPE_IMM_WIDTH = 12
+    parameter I_TYPE_IMM_WIDTH = 12,
+    parameter S_TYPE_IMM_WIDTH = 12,
+    parameter B_TYPE_IMM_WIDTH = 13
 ) (
     input logic clk,
     input logic rst
@@ -28,9 +30,14 @@ logic [31:0] PC;
 always_ff @(posedge clk) begin
     if (rst) begin
         PC <= 0;
+    end else if (branch && zero) begin
+        // B-TYPE immediate sign extender
+        logic [31:0] btype_imm_sign_extended = { {19{b_type_imm[B_TYPE_IMM_WIDTH - 1]}}, b_type_imm };
+        PC <= PC + $signed(btype_imm_sign_extended);
     end else begin
         PC <= PC + 1;
     end
+    $display("PC %d", PC);
 end
 
 // Fetch
@@ -41,7 +48,8 @@ Memory #(
     .ADDR_WIDTH(32),
     .MEM_SIZE(1024),
     .NUM_READ_PORTS(1),
-    .NUM_WRITE_PORTS(1)
+    .NUM_WRITE_PORTS(1),
+    .NAME("I-MEM")
 ) instruction_memory (
     .clk(clk),
     .reset(rst),
@@ -60,6 +68,8 @@ logic [ADDR_WIDTH - 1: 0]   rs1;
 logic [ADDR_WIDTH - 1: 0]   rs2;
 logic [ADDR_WIDTH - 1: 0]   rd;
 logic [I_TYPE_IMM_WIDTH - 1: 0] i_type_imm;
+logic [S_TYPE_IMM_WIDTH - 1: 0] s_type_imm;
+logic [B_TYPE_IMM_WIDTH - 1: 0] b_type_imm; //LSB implicitly 0
 
 // Decode
 Decode #(
@@ -71,7 +81,9 @@ Decode #(
     .RS_WIDTH(RS_WIDTH),
     .NUM_REGS(NUM_REGS),
     .ADDR_WIDTH(ADDR_WIDTH),
-    .I_TYPE_IMM_WIDTH(I_TYPE_IMM_WIDTH)
+    .I_TYPE_IMM_WIDTH(I_TYPE_IMM_WIDTH),
+    .S_TYPE_IMM_WIDTH(S_TYPE_IMM_WIDTH),
+    .B_TYPE_IMM_WIDTH(B_TYPE_IMM_WIDTH)
 ) decode_instruction (
     .instruction(instruction),
     .opcode(opcode),
@@ -80,7 +92,9 @@ Decode #(
     .rs1(rs1),
     .rs2(rs2),
     .rd(rd),
-    .i_type_imm(i_type_imm)
+    .i_type_imm(i_type_imm),
+    .s_type_imm(s_type_imm),
+    .b_type_imm(b_type_imm)
 );
 
 // Control
@@ -90,14 +104,13 @@ logic mem_write;
 logic mem_to_reg;
 logic branch;
 logic jump;
-logic [2:0] imm_sel;
+logic [3:0] imm_sel;
 
 Control #(
     .NUM_OPS(64),
-    .I_TYPE_IMM_WIDTH(12)
+    .FUNCT3_WIDTH(3)
 ) control_unit (
     .opcode(opcode),
-    .i_type_imm(i_type_imm),
     .funct3(funct3),
     .reg_write(reg_write),
     .mem_read(mem_read),
@@ -131,9 +144,6 @@ RF #(
     .read_data({read_data_1, read_data_2})
 );
 
-// immediate extender
-logic [31:0] imm_sign_extended = { {20{i_type_imm[I_TYPE_IMM_WIDTH - 1]}}, i_type_imm };
-logic [31:0] imm_zero_extended = { {20{1'b0}}, i_type_imm };
 
 // Execute
 
@@ -142,8 +152,11 @@ logic [31:0] operand2;
 always_comb begin
     case(imm_sel)
     0: operand2 = read_data_2;
-    1: operand2 = imm_sign_extended;
-    2: operand2 = imm_zero_extended;
+    // I-TYPE immediate extender
+    1: operand2 = { {20{i_type_imm[I_TYPE_IMM_WIDTH - 1]}}, i_type_imm };
+    2: operand2 = { {20{1'b0}}, i_type_imm };
+    // S-TYPE immediate extender
+    3: operand2 = { {20{s_type_imm[S_TYPE_IMM_WIDTH - 1]}}, s_type_imm };
     default: operand2 = 0;
     endcase
 end
@@ -171,7 +184,8 @@ Memory #(
     .ADDR_WIDTH(32),
     .MEM_SIZE(1024),
     .NUM_READ_PORTS(1),
-    .NUM_WRITE_PORTS(1)
+    .NUM_WRITE_PORTS(1),
+    .NAME("D-MEM")
 ) data_memory (
     .clk(clk),
     .reset(rst),
