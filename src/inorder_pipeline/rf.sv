@@ -30,16 +30,19 @@ module RF #(
             end
         end else begin
             for (j = 0; j < WRITE_PORTS; j = j + 1) begin
-                if (write_reg_enable[j]) begin
+                if (write_reg_enable[j] & write_addrs[j] != 0) begin
                     $display("Writing %d to register %d (reg_write %d)", $signed(write_data[j]), write_addrs[j], write_reg_enable[j]);
                     regs[write_addrs[j]] <= write_data[j];
                 end
             end
-            // print out the registers
-            $display("Registers:");
-            for (i = 0; i < NUM_REGS; i = i + 1) begin
-                $display("Register %d: %d %d", i, regs[i], $signed(regs[i]));
-            end
+        end
+    end
+
+    always @(negedge clk) begin
+        // print out the registers
+        $display("Registers:");
+        for (i = 0; i < NUM_REGS; i = i + 1) begin
+            $display("Register %d: %d %d", i, regs[i], $signed(regs[i]));
         end
     end
 

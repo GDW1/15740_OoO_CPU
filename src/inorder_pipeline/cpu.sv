@@ -89,6 +89,8 @@ always_ff @(posedge clk) begin
         // B-TYPE immediate sign extender
         logic [31:0] btype_imm_sign_extended = { {19{b_type_imm[B_TYPE_IMM_WIDTH - 1]}}, b_type_imm };
         PC <= PC + $signed(btype_imm_sign_extended);
+    end else if (stall) begin
+        PC <= PC;
     end else begin
         PC <= PC + 1;
     end
@@ -118,85 +120,102 @@ Memory #(
 
 always_ff @(posedge clk) begin : preg_setting
     if (rst) begin
-        fetch_decode_instruction_preg = 0;
-        fetch_decode_PC_preg = 0; 
+        fetch_decode_instruction_preg <= 0;
+        fetch_decode_PC_preg <= 0; 
 
-        decode_execute_i_type_imm = 0;
-        decode_execute_s_type_imm = 0;
-        decode_execute_b_type_imm = 0;
-        decode_execute_read_data_1 = 0;
-        decode_execute_read_data_2 = 0;
-        decode_execute_opcode = 0;
-        decode_execute_funct3 = 0;
-        decode_execute_funct7 = 0;
-        decode_execute_pc = 0;
-        decode_execute_imm_select = 0;
-        decode_execute_write_reg_enable = 0;
-        decode_execute_mem_write = 0;
-        decode_execute_mem_read = 0;
-        decode_execute_branch = 0;
-        decode_execute_jump = 0;
-        decode_execute_rd = 0;
-        decode_execute_mem_to_reg = 0;
+        decode_execute_i_type_imm <= 0;
+        decode_execute_s_type_imm <= 0;
+        decode_execute_b_type_imm <= 0;
+        decode_execute_read_data_1 <= 0;
+        decode_execute_read_data_2 <= 0;
+        decode_execute_opcode <= 0;
+        decode_execute_funct3 <= 0;
+        decode_execute_funct7 <= 0;
+        decode_execute_pc <= 0;
+        decode_execute_imm_select <= 0;
+        decode_execute_write_reg_enable <= 0;
+        decode_execute_mem_write <= 0;
+        decode_execute_mem_read <= 0;
+        decode_execute_branch <= 0;
+        decode_execute_jump <= 0;
+        decode_execute_rd <= 0;
+        decode_execute_mem_to_reg <= 0;
 
-        execute_mem_rd = 0;
-        execute_mem_reg_read_2 = 0;
-        execute_mem_zero = 0;
-        execute_mem_ALU_result = 0;
+        execute_mem_rd <= 0;
+        execute_mem_reg_read_2 <= 0;
+        execute_mem_zero <= 0;
+        execute_mem_ALU_result <= 0;
 
-        execute_mem_mem_read = 0;
-        execute_mem_mem_write = 0;
-        execute_mem_reg_write = 0;
-        execute_mem_mem_to_reg = 0;
-        execute_mem_branch = 0;
-        execute_mem_jump = 0;
+        execute_mem_mem_read <= 0;
+        execute_mem_mem_write <= 0;
+        execute_mem_reg_write <= 0;
+        execute_mem_mem_to_reg <= 0;
+        execute_mem_branch <= 0;
+        execute_mem_jump <= 0;
 
-        mem_wb_alu_result = 0;
-        mem_wb_mem_result = 0;
-        mem_wb_rd = 0;
-        mem_wb_reg_write = 0;
-        mem_wb_mem_to_reg = 0;
+        mem_wb_alu_result <= 0;
+        mem_wb_mem_result <= 0;
+        mem_wb_rd <= 0;
+        mem_wb_reg_write <= 0;
+        mem_wb_mem_to_reg <= 0;
     end else begin
-        fetch_decode_instruction_preg = instruction; 
-        fetch_decode_PC_preg = PC; 
+        mem_wb_alu_result <= execute_mem_ALU_result;
+        mem_wb_mem_result <= mem_read_data;
+        mem_wb_rd <= execute_mem_rd;
+        mem_wb_reg_write <= execute_mem_reg_write;
+        mem_wb_mem_to_reg <= execute_mem_mem_to_reg; 
 
-        decode_execute_i_type_imm = i_type_imm;
-        decode_execute_s_type_imm = s_type_imm;
-        decode_execute_b_type_imm = b_type_imm;
-        decode_execute_read_data_1 = read_data_1; 
-        decode_execute_read_data_2 = read_data_2;
-        decode_execute_opcode = opcode;
-        decode_execute_funct3 = funct3;
-        decode_execute_funct7 = funct7;
-        decode_execute_pc = fetch_decode_PC_preg;
-        decode_execute_imm_select = imm_sel;
-        decode_execute_write_reg_enable = reg_write;
-        decode_execute_mem_write = mem_write;
-        decode_execute_mem_read = mem_read;
-        decode_execute_branch = branch;
-        decode_execute_jump = jump;   
-        decode_execute_rd = rd;   
-        decode_execute_mem_to_reg = mem_to_reg;
+        execute_mem_rd <= decode_execute_rd;
+        execute_mem_reg_read_2 <= decode_execute_read_data_2;
+        execute_mem_zero <= zero;
+        execute_mem_ALU_result <= alu_result;
+        execute_mem_mem_read <= decode_execute_mem_read;
+        execute_mem_mem_write <= decode_execute_mem_write;
+        execute_mem_reg_write <= decode_execute_write_reg_enable;
+        execute_mem_mem_to_reg <= decode_execute_mem_to_reg;
+        execute_mem_branch <= decode_execute_branch;
+        execute_mem_jump <= decode_execute_jump;
 
-        execute_mem_rd = decode_execute_rd;
-        execute_mem_reg_read_2 = decode_execute_read_data_2;
-        execute_mem_zero = zero;
-        execute_mem_ALU_result = alu_result;
-        execute_mem_mem_read = decode_execute_mem_read;
-        execute_mem_mem_write = decode_execute_mem_write;
-        execute_mem_reg_write = decode_execute_write_reg_enable;
-        execute_mem_mem_to_reg = decode_execute_mem_to_reg;
-        execute_mem_branch = decode_execute_branch;
-        execute_mem_jump = decode_execute_jump;
+        fetch_decode_instruction_preg <= instruction; 
+        fetch_decode_PC_preg <= PC; 
 
-        mem_wb_alu_result = execute_mem_ALU_result;
-        mem_wb_mem_result = mem_read_data;
-        mem_wb_rd = execute_mem_rd;
-        mem_wb_reg_write = execute_mem_reg_write;
-        mem_wb_mem_to_reg = execute_mem_mem_to_reg; 
+        decode_execute_i_type_imm <= i_type_imm;
+        decode_execute_s_type_imm <= s_type_imm;
+        decode_execute_b_type_imm <= b_type_imm;
+        decode_execute_read_data_1 <= read_data_1; 
+        decode_execute_read_data_2 <= read_data_2;
+        decode_execute_opcode <= opcode;
+        decode_execute_funct3 <= funct3;
+        decode_execute_funct7 <= funct7;
+        decode_execute_pc <= fetch_decode_PC_preg;
+        decode_execute_imm_select <= imm_sel;
+        decode_execute_write_reg_enable <= reg_write & ~stall;
+        decode_execute_mem_write <= mem_write & ~stall;
+        decode_execute_mem_read <= mem_read & ~stall;
+        decode_execute_branch <= branch & ~stall;
+        decode_execute_jump <= jump & ~stall;   
+        decode_execute_rd <= rd;   
+        decode_execute_mem_to_reg <= mem_to_reg;
     end
 end
 
+
+logic s00 = (rs1 == execute_mem_rd);
+logic s01 = ((rs2 == execute_mem_rd) & imm_sel == 0);
+
+logic s10 = (rs1 == mem_wb_rd);
+logic s11 = ((rs2 == mem_wb_rd) & imm_sel == 0);
+
+logic s20 = (rs1 == decode_execute_rd);
+logic s21 = ((rs2 == decode_execute_rd) & imm_sel == 0);
+
+logic s0 = (s00 | s01) & execute_mem_reg_write;
+logic s1 = (s10 | s11) & mem_wb_reg_write;
+logic s2 = (s20 | s21) & decode_execute_write_reg_enable;
+logic stall;
+always_comb begin
+    stall = s0 | s1 | s2;
+end
 // fetch stage end
 // decode stage begin
 
