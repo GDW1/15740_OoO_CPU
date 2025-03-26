@@ -1,4 +1,4 @@
 #!/bin/bash
 
-nodejs translator.js
+node translator.js
 

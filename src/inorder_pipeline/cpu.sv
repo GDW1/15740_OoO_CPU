@@ -85,10 +85,12 @@ logic [3:0] imm_sel;
 always_ff @(posedge clk) begin
     if (rst) begin
         PC <= 0;
-    end else if (branch && zero) begin
+    end else if (decode_execute_branch && zero) begin
         // B-TYPE immediate sign extender
-        logic [31:0] btype_imm_sign_extended = { {19{b_type_imm[B_TYPE_IMM_WIDTH - 1]}}, b_type_imm };
+        logic [31:0] btype_imm_sign_extended = { {19{decode_execute_b_type_imm[B_TYPE_IMM_WIDTH - 1]}}, decode_execute_b_type_imm };
         PC <= PC + $signed(btype_imm_sign_extended);
+    end else if (stall_at_fetch) begin
+        PC <= PC;
     end else if (stall) begin
         PC <= PC;
     end else begin
@@ -99,7 +101,7 @@ end
 
 // Fetch Stage begin
 
-logic [31:0] instruction;
+logic [31:0] fetched_instruction;
 Memory #(
     .DATA_WIDTH(32),
     .ADDR_WIDTH(32),
@@ -115,8 +117,13 @@ Memory #(
     .read_addr({PC}),
     .read_enable('b1),
     .write_enable('b0),
-    .read_data({instruction})
+    .read_data({fetched_instruction})
 );
+
+// nop instruction
+logic [31:0] nop = 32'h00000013;
+
+logic[31:0] instruction = (stall_at_fetch | decode_execute_branch | decode_execute_jump) ? nop : fetched_instruction;
 
 always_ff @(posedge clk) begin : preg_setting
     if (rst) begin
@@ -176,8 +183,13 @@ always_ff @(posedge clk) begin : preg_setting
         execute_mem_branch <= decode_execute_branch;
         execute_mem_jump <= decode_execute_jump;
 
-        fetch_decode_instruction_preg <= instruction; 
-        fetch_decode_PC_preg <= PC; 
+        if (stall) begin
+            fetch_decode_instruction_preg <= fetch_decode_instruction_preg;
+            fetch_decode_PC_preg <= fetch_decode_PC_preg;
+        end else begin
+            fetch_decode_instruction_preg <= instruction; 
+            fetch_decode_PC_preg <= PC; 
+        end
 
         decode_execute_i_type_imm <= i_type_imm;
         decode_execute_s_type_imm <= s_type_imm;
@@ -200,18 +212,20 @@ always_ff @(posedge clk) begin : preg_setting
 end
 
 
-logic s00 = (rs1 == execute_mem_rd);
-logic s01 = ((rs2 == execute_mem_rd) & imm_sel == 0);
+logic s00 = (rs1 == execute_mem_rd) & ~(rs1 == 0 | execute_mem_rd == 0);
+logic s01 = ((rs2 == execute_mem_rd) & imm_sel == 0 & ~(rs2 == 0 | execute_mem_rd == 0));
 
-logic s10 = (rs1 == mem_wb_rd);
-logic s11 = ((rs2 == mem_wb_rd) & imm_sel == 0);
+logic s10 = (rs1 == mem_wb_rd) & ~(rs1 == 0 | mem_wb_rd == 0);
+logic s11 = ((rs2 == mem_wb_rd) & imm_sel == 0 & ~(rs2 == 0 | execute_mem_rd == 0));
 
-logic s20 = (rs1 == decode_execute_rd);
-logic s21 = ((rs2 == decode_execute_rd) & imm_sel == 0);
+logic s20 = (rs1 == decode_execute_rd) & ~(rs1 == 0 | decode_execute_rd == 0);
+logic s21 = ((rs2 == decode_execute_rd) & imm_sel == 0 & ~(rs2 == 0 | execute_mem_rd == 0));
 
 logic s0 = (s00 | s01) & execute_mem_reg_write;
 logic s1 = (s10 | s11) & mem_wb_reg_write;
 logic s2 = (s20 | s21) & decode_execute_write_reg_enable;
+// check if the instruction in exeucte is a branch instruction
+logic stall_at_fetch = branch | jump;
 logic stall;
 always_comb begin
     stall = s0 | s1 | s2;
