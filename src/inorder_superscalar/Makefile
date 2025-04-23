@@ -1,5 +1,5 @@
 VC=/Users/gwilks/Desktop/Classes/S25/15740_project/15740_OoO_CPU/verilator/verilator/bin/verilator #verilog compiler
-VFLAGS= -sv --trace --cc --timing #verilator flags
+VFLAGS= -sv --trace --cc --timing --top-module test #verilator flags
 TESTSV_FILE=test.sv
 SV_FILES=$(wildcard *.sv)
 CPP_FILE=tb_test.cpp
@@ -25,4 +25,4 @@ clean:
 	rm -rf obj_dir
 
 compile:
-	(cd ../../riscv_translator/; ./translate.sh; mv memory_file.mem ../src/inorder_pipeline)
+	(cd ../../riscv_translator/; ./translate.sh; mv memory_file.mem ../src/inorder_superscalar)
