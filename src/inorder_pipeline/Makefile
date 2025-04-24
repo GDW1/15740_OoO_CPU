@@ -1,4 +1,4 @@
-VC=/Users/gwilks/Desktop/Classes/S25/15740_project/15740_OoO_CPU/verilator/verilator/bin/verilator #verilog compiler
+VC=verilator #verilog compiler
 VFLAGS= -sv --trace --cc --timing #verilator flags
 TESTSV_FILE=test.sv
 SV_FILES=$(wildcard *.sv)
