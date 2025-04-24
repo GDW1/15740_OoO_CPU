@@ -23,6 +23,7 @@ run: obj_dir/$(EXE_FILE)
 
 clean:
 	rm -rf obj_dir
+	rm -f memory_file.mem
 
 compile:
 	../../riscv_translator/translate.sh ../../riscv_translator/code.asm memory_file.mem
