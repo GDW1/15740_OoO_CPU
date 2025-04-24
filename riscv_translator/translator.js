@@ -6,8 +6,17 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const fs = require('fs')
 
-const asmf = 'code.asm';
-const binf = 'memory_file.mem';
+
+const args = process.argv;
+if (args.length < 4) {
+  console.error("Too few arguments. Usage: node translator.js <code_file.asm> <output_file.mem>")
+  process.exit(-1);
+}
+
+//code file
+const asmf = args[2];
+//code/binary file output
+const binf = args[3];
 
 function translate_ins(ins) {
   let inst = new Instruction(ins);

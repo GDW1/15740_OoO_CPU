@@ -25,4 +25,4 @@ clean:
 	rm -rf obj_dir
 
 compile:
-	(cd ../../riscv_translator/; ./translate.sh; mv memory_file.mem ../src/inorder_single_cycle)
+	../../riscv_translator/translate.sh ../../riscv_translator/code.asm memory_file.mem
