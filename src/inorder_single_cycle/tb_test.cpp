@@ -8,6 +8,7 @@
 vluint64_t sim_time = 0;
 
 int main(int argc, char** argv, char** env) {
+    Verilated::commandArgs(argc, argv);
     Vtest *dut = new Vtest;
 
     Verilated::traceEverOn(true);

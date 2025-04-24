@@ -19,8 +19,14 @@ module Memory #(
 
     //Read in the memory file into our memory
     initial begin
-        $readmemb("memory_file.mem", mem);        
+        string memfile;
+        if ($value$plusargs("memory_file=%s", memfile)) begin
+            $readmemb(memfile, mem);
+        end else begin
+            $readmemb("memory_file.mem", mem);
+        end
     end
+
     logic [DATA_WIDTH-1:0] mem[MEM_SIZE-1:0];
 
     always_ff @(posedge clk) begin

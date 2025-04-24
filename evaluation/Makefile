@@ -34,3 +34,8 @@ bin:
 
 bin/%.mem: test_files/%.asm
 	../riscv_translator/translate.sh $< $@
+
+run: $(code_bins)
+	$(inorder_single_cycle)/Vtest +memory_file=$<
+	$(inorder_pipeline)/Vtest +memory_file=$<
+	$(inorder_superscalar)/Vtest +memory_file=$<
