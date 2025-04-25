@@ -1,6 +1,8 @@
     # Inputs:
     # a0 = base address of array
+    li a0, 20
     # a1 = length of array (number of elements)
+    li a1, 2
     # Output:
     # a2 = sum (reduction)
 

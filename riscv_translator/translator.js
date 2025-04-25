@@ -20,7 +20,6 @@ const binf = args[3];
 
 const branch_map = new Map();
 
-
 //Returns instruction in byte format or empty string
 // if line was either a comment or a label
 function translate_ins(ins, pc) {
@@ -43,6 +42,18 @@ function translate_ins(ins, pc) {
     return "";
   }
 
+  //pseudo instructions
+  if(/\bli\s/.test(ins)) { //ins contains li but nothing before like slli
+    //li x, i = addi x, x0, i
+    var reg = ins.replace("li ", "").trim().split(" ")[0].replace(",", "");
+    var imm = ins.replace("li ", "").trim().split(" ")[1].trim();
+    ins = "addi " + reg + ", x0, " + imm;
+  }
+  if(/\bj\s/.test(ins)) { //ins contains j but nothing before
+    //j offset = beq x0, x0, offset
+    ins = ins.replace("j ", "beq x0, x0, ");
+  }
+
   if(ins.includes("beq") ||
      ins.includes("bne") ||
      ins.includes("blt") ||
@@ -59,16 +70,15 @@ function translate_ins(ins, pc) {
     }
   }
 
-  //pseudo instructions
-  if(ins.includes("li")) {
-    //li x, i = addi x, x0, i
-    var reg = ins.replace("li ", "").split(" ")[0].replace(",", "");
-    var imm = ins.replace("li ", "").split(" ")[1].trim();
-    ins = "addi " + reg + ", x0, " + imm;
-  }
 
   //Not label or branch instruction
-  let inst = new Instruction(ins);
+  let inst;
+  try {
+    inst = new Instruction(ins);
+  } catch (error) {
+    console.error(error);
+    console.error("Instruction: " + ins + ", PC: " + pc);
+  }
   return inst.bin + "\n";
 }
 
@@ -83,6 +93,17 @@ try {
   const lines = data.split(/\r?\n/);
   var binlines = "";
   var pc = 0;
+  //First pass only builds labels
+  for(var i = 0; i < lines.length-1; i++) {
+    const l = lines[i];
+    var binline = translate_ins(l, pc);
+    if(binline != "") {
+      pc++; //increment pc
+    }
+  }
+  
+  //Now actually assemble
+  pc = 0;
   for(var i = 0; i < lines.length-1; i++) {
     const l = lines[i];
     var binline = translate_ins(l, pc);
