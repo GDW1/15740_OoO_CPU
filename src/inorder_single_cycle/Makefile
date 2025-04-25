@@ -1,5 +1,5 @@
 VC=verilator #verilog compiler
-VFLAGS= -sv --trace --cc --timing --public-flat-rw #verilator flags
+VFLAGS= -sv --trace --cc --timing #verilator flags
 TESTSV_FILE=test.sv
 SV_FILES=$(wildcard *.sv)
 CPP_FILE=tb_test.cpp
@@ -18,12 +18,14 @@ obj_dir: $(TESTSV_FILE)
 
 .PHONY: run clean compile
 
-run: obj_dir/$(EXE_FILE)
+run: obj_dir/$(EXE_FILE) memory_file.mem
 	@./obj_dir/$(EXE_FILE)
 
 clean:
 	rm -rf obj_dir
-	rm -f memory_file.mem
+	rm -f memory_file.mem *.vcd
 
-compile:
-	../../riscv_translator/translate.sh ../../riscv_translator/code.asm memory_file.mem
+compile: memory_file.mem
+
+%.mem:
+	../../riscv_translator/translate.sh ../../riscv_translator/code.asm $@

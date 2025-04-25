@@ -101,7 +101,7 @@ end
 
 // Fetch Stage begin
 
-logic [31:0] fetched_instruction;
+logic [31:0] fetched_instruction /* verilator public_flat */;
 Memory #(
     .DATA_WIDTH(32),
     .ADDR_WIDTH(32),
