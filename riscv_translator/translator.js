@@ -21,7 +21,23 @@ const binf = args[3];
 const branch_map = new Map();
 
 
+//Returns instruction in byte format or empty string
+// if line was either a comment or a label
 function translate_ins(ins, pc) {
+  if(ins.includes("#")) { //remove comment
+    var splitins = ins.split("#");
+    if(splitins[0].trim() == "") {
+      //line is *just* a comment
+      return "";
+    }
+    ins = splitins[0].trim();
+  }
+
+  if(ins.trim() == "" || ins.trim() == "\n") {
+    //If line is empty, do nothing
+    return "";
+  }
+
   if(ins.includes(":")) { //Found label
     branch_map.set(ins.replace(":", ""), pc);
     return "";
@@ -43,6 +59,14 @@ function translate_ins(ins, pc) {
     }
   }
 
+  //pseudo instructions
+  if(ins.includes("li")) {
+    //li x, i = addi x, x0, i
+    var reg = ins.replace("li ", "").split(" ")[0].replace(",", "");
+    var imm = ins.replace("li ", "").split(" ")[1].trim();
+    ins = "addi " + reg + ", x0, " + imm;
+  }
+
   //Not label or branch instruction
   let inst = new Instruction(ins);
   return inst.bin + "\n";
@@ -58,9 +82,17 @@ try {
   const data = fs.readFileSync(asmf, 'utf8');
   const lines = data.split(/\r?\n/);
   var binlines = "";
+  var pc = 0;
   for(var i = 0; i < lines.length-1; i++) {
     const l = lines[i];
-    binlines += translate_ins(l, i);
+    var binline = translate_ins(l, pc);
+    if(binline != "") {
+      //write instruction
+      binlines += binline;
+      pc++; //increment pc
+    } else {
+      //not an instruction (comment or label)
+    }
   }
   write_bin_file(binlines);
 

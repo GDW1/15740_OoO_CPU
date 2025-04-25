@@ -1,0 +1,4 @@
+bin/matmult.mem
+inorder_single_cycle 150000
+inorder_pipeline 150007
+inorder_superscalar 29
