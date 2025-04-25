@@ -29,7 +29,7 @@ module SuperScalarCPU #(
 
 /**** BEGIN FETCH STAGE ****/
 logic stall_fetch;
-logic [31:0] nop = 32'h00000013;
+logic [31:0] nop /* verilator public_flat */ = 32'h00000013;
 logic [31:0] basePC;
 logic [31:0] PC_vector [NUMBER_EXECUTION_WIDTH];
 
@@ -143,7 +143,7 @@ logic jump_vector       [NUMBER_EXECUTION_WIDTH-1:0];
 logic [3:0] imm_sel_vector [NUMBER_EXECUTION_WIDTH];
 
 
-logic [INSN_WIDTH-1:0] instruction_vector_preg_temp [NUMBER_EXECUTION_WIDTH];
+logic [INSN_WIDTH-1:0] instruction_vector_preg_temp [NUMBER_EXECUTION_WIDTH] /* verilator public_flat */;
 
 // logic [RD_WIDTH-1:0] masked_rd_vector [NUMBER_EXECUTION_WIDTH];
 
@@ -305,7 +305,7 @@ always_ff @(posedge clk) begin : instruction_vector_preg_temp_logic
     for (int pointer = 0; pointer < NUMBER_EXECUTION_WIDTH; pointer++) begin
         if (pointer < (pointer_bound)) begin
             if (~branch) begin
-                instruction_vector_preg_temp[pointer] <= instruction_vector_preg[pointer + 32'(PC_increment)];
+                instruction_vector_preg_temp[pointer] <= instruction_vector_preg_temp[pointer + 32'(PC_increment)];
             end else begin
                 instruction_vector_preg_temp[pointer] <= nop;
             end

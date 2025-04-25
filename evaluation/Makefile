@@ -43,10 +43,10 @@ run: results $(result_files)
 
 results: all
 	@mkdir -p results
-	rm results/*
+	@#rm results/*
 
 #run tests for each of the code files for each of the CPU archs.
 results/%.res: bin/%.mem
 	@echo "inorder_single_cycle" $(shell ./runtest.sh $(inorder_single_cycle)/Vtest +memory_file=$<) >> $@
-	@#$(inorder_pipeline)/Vtest +memory_file=$<
-	@#$(inorder_superscalar)/Vtest +memory_file=$<
+	@echo "inorder_pipeline" $(shell ./runtest.sh $(inorder_pipeline)/Vtest +memory_file=$<) >> $@
+	@echo "inorder_superscalar" $(shell ./runtest.sh $(inorder_superscalar)/Vtest +memory_file=$<) >> $@

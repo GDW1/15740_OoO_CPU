@@ -1,1 +1,6 @@
 inorder_single_cycle 10
+inorder_pipeline 19
+inorder_superscalar 10
+inorder_single_cycle 10
+inorder_pipeline 300
+inorder_superscalar 10
