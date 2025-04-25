@@ -18,9 +18,34 @@ const asmf = args[2];
 //code/binary file output
 const binf = args[3];
 
-function translate_ins(ins) {
+const branch_map = new Map();
+
+
+function translate_ins(ins, pc) {
+  if(ins.includes(":")) { //Found label
+    branch_map.set(ins.replace(":", ""), pc);
+    return "";
+  }
+
+  if(ins.includes("beq") ||
+     ins.includes("bne") ||
+     ins.includes("blt") ||
+     ins.includes("bge") ||
+     ins.includes("bltu") ||
+     ins.includes("bgeu")) { //Branch instruction
+    var splitins = ins.split(",");
+    var lastarg = splitins[splitins.length-1].trim();
+    var label_pc = branch_map.get(lastarg);
+    if(label_pc) { //is label
+      var off = label_pc - pc + 1;
+      splitins[splitins.length-1] = ' ' + off.toString();
+      ins = splitins.join();
+    }
+  }
+
+  //Not label or branch instruction
   let inst = new Instruction(ins);
-  return inst.bin;
+  return inst.bin + "\n";
 }
 
 function write_bin_file(content) {
@@ -35,7 +60,7 @@ try {
   var binlines = "";
   for(var i = 0; i < lines.length-1; i++) {
     const l = lines[i];
-    binlines += translate_ins(l) + "\n";
+    binlines += translate_ins(l, i);
   }
   write_bin_file(binlines);
 
