@@ -112,13 +112,13 @@ always_ff @(posedge clk or posedge rst) begin
         end
     end else begin
         for (int i = 0; i < NUMBER_EXECUTION_WIDTH; i++) begin
-            if (~stall_fetch) begin
-                instruction_vector_preg[i] <= instruction_vector[i];
-                PC_vector_preg[i] <= PC_vector[i];
-            end else begin
-                instruction_vector_preg[i] <= nop;
-                PC_vector_preg[i] <= nop;
-            end
+            // if (~stall_fetch) begin
+            instruction_vector_preg[i] <= instruction_vector[i];
+            PC_vector_preg[i] <= PC_vector[i];
+            // end else begin
+            //     instruction_vector_preg[i] <= nop;
+            //     PC_vector_preg[i] <= nop;
+            // end
         end
     end
 end
@@ -294,14 +294,25 @@ end
 // logic [$clog2(NUMBER_EXECUTION_WIDTH)-1:0] pointer;
 // logic [$clog2(NUMBER_EXECUTION_WIDTH)-1:0] pointer2;
 logic branch;
-always_ff @(posedge clk) begin : instruction_vector_preg_temp_logic
-    branch = 0;
-    for (int i = 0; i < NUMBER_EXECUTION_WIDTH; i++) begin
-        if (branch_vector[i]) begin
-            branch = 1;
-            break;
+    always_comb begin
+        branch = 0;
+        for (int i = 0; i < NUMBER_EXECUTION_WIDTH; i++) begin
+            if (branch_vector_preg[i] & zero_vector[i]) begin
+                branch = 1;
+                break;
+            end
         end
     end
+
+always_ff @(posedge clk) begin : instruction_vector_preg_temp_logic
+//     branch = 0;
+//     for (int i = 0; i < NUMBER_EXECUTION_WIDTH; i++) begin
+//         if (branch_vector[i] & final_mask_vector[i]) begin
+//             branch = 1;
+//             break;
+//         end
+//     end
+
     for (int pointer = 0; pointer < NUMBER_EXECUTION_WIDTH; pointer++) begin
         if (pointer < (pointer_bound)) begin
             if (~branch) begin
@@ -310,9 +321,8 @@ always_ff @(posedge clk) begin : instruction_vector_preg_temp_logic
                 instruction_vector_preg_temp[pointer] <= nop;
             end
         end else begin
-
             if (~branch) begin
-                instruction_vector_preg_temp[pointer] <= instruction_vector_preg[pointer - 32'(PC_increment)];
+                instruction_vector_preg_temp[pointer] <= instruction_vector_preg[pointer - 32'(pointer_bound)];
             end else begin
                 instruction_vector_preg_temp[pointer] <= nop;
             end

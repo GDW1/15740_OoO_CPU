@@ -34,7 +34,7 @@ cycle_start:
         if (dut->clk == 0) {goto cycle_start;}
         for(int i = 0; i < nways; i++) {
             auto instruction = dut->rootp->INSTRUCTION_VAR[i];
-            if(instruction != 0 || instruction == nop){
+            if(instruction != 0){
                 goto cycle_start; //program did not finish yet
             }
         }
