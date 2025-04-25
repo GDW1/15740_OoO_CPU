@@ -31,7 +31,7 @@ logic [31:0] PC;
     write_reg_enable, mem_write, mem_read, branch, jump, imm_select
 */
 /* pipeline registers begin */
-logic [31:0] fetch_decode_instruction_preg;
+logic [31:0] fetch_decode_instruction_preg /* verilator public_flat */;
 logic [31:0] fetch_decode_PC_preg; 
 
 logic [I_TYPE_IMM_WIDTH - 1:0] decode_execute_i_type_imm;
@@ -91,8 +91,8 @@ always_ff @(posedge clk) begin
         PC <= PC + $signed(btype_imm_sign_extended);
     end else if (stall_at_fetch) begin
         PC <= PC;
-    end else if (stall) begin
-        PC <= PC;
+    // end else if (stall) begin
+        // PC <= PC;
     end else begin
         PC <= PC + 1;
     end
@@ -101,7 +101,7 @@ end
 
 // Fetch Stage begin
 
-logic [31:0] fetched_instruction /* verilator public_flat */;
+logic [31:0] fetched_instruction;
 Memory #(
     .DATA_WIDTH(32),
     .ADDR_WIDTH(32),

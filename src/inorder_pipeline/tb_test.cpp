@@ -19,12 +19,14 @@ int main(int argc, char** argv, char** env) {
 
     dut->runtime = MAX_SIM_TIME - 1;
     auto instruction = 1;
-    while (!Verilated::gotFinish() && sim_time < MAX_SIM_TIME && instruction != 0) {
+    int booted = 4; 
+    while (!Verilated::gotFinish() && sim_time < MAX_SIM_TIME && (instruction != 0 || booted != 0)) {
         dut->clk ^= 1;
         dut->eval();
         m_trace->dump(sim_time);
         sim_time++;
-        instruction = dut->rootp->test__DOT__cpu__DOT__fetched_instruction;
+        instruction = dut->rootp->test__DOT__cpu__DOT__fetch_decode_instruction_preg;
+        booted = booted == 0? 0 : booted - 1;
     }
 
     /*Assume that it always takes 7 cycles to flush last ins in pipeline*/
