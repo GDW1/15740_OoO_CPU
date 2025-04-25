@@ -42,7 +42,7 @@ end
 
 // Fetch
 
-logic [31:0] instruction;
+logic [31:0] instruction /* verilator public_flat */;
 Memory #(
     .DATA_WIDTH(32),
     .ADDR_WIDTH(32),

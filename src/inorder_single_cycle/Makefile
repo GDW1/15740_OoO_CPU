@@ -1,5 +1,5 @@
 VC=verilator #verilog compiler
-VFLAGS= -sv --trace --cc --timing #verilator flags
+VFLAGS= -sv --trace --cc --timing --public-flat-rw #verilator flags
 TESTSV_FILE=test.sv
 SV_FILES=$(wildcard *.sv)
 CPP_FILE=tb_test.cpp

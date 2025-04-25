@@ -49,6 +49,8 @@ module Memory #(
             if (read_enable[i]) begin
                 read_data[i] = mem[read_addr[i]];
                 $display("[%s] Reading %d from address %d", NAME, read_data[ i], read_addr[i]);
+            end else begin
+                read_data[i] = 0;
             end
         end
     end
