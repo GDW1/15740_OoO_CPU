@@ -1,0 +1,4 @@
+bin/vecrecgpt.mem
+inorder_single_cycle 150000
+inorder_pipeline 24
+inorder_superscalar 12
